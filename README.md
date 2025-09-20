@@ -1,14 +1,29 @@
-# MiniBank
+# 🏦 MiniBank - Digital Banking Platform
 
-A production-grade digital banking platform featuring a modern Next.js frontend and event-driven microservices backend, supporting multi-currency operations, foreign exchange processing, and comprehensive financial compliance.
+[![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
+[![Spring Boot 3.4.0](https://img.shields.io/badge/Spring%20Boot-3.4.0-green.svg)](https://spring.io/projects/spring-boot)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue.svg)](https://www.typescriptlang.org/)
+[![Security Rating](https://img.shields.io/badge/Security-A+-brightgreen.svg)](https://github.com/mariocodecr/MiniBank)
 
-## Project Overview
+A production-grade digital banking platform featuring a modern **Next.js frontend** and **event-driven microservices backend**, supporting multi-currency operations, foreign exchange processing, and comprehensive financial compliance.
 
-MiniBank is a full-stack banking platform built with modern technologies and architectural patterns. The project follows a milestone-based development approach:
+## 🚀 Project Overview
 
-- **M1**: Core payment and ledger functionality with double-entry accounting system
-- **M2**: Event-driven architecture with Kafka, Outbox/Inbox patterns, and saga orchestration  
-- **M3**: Multi-currency accounts, real-time FX engine, treasury risk management, and AML compliance
+MiniBank is a comprehensive full-stack banking platform built with modern technologies and architectural patterns. The system demonstrates enterprise-grade financial software development with:
+
+- **🔐 Security-First Design**: NextAuth.js + Keycloak OIDC integration with JWT token management
+- **💱 Multi-Currency Support**: Real-time FX rates, cross-currency payments, and treasury management
+- **📊 Event-Driven Architecture**: Kafka-based microservices with saga orchestration patterns
+- **🏛️ Double-Entry Accounting**: Comprehensive ledger system ensuring financial data integrity
+- **⚡ Real-Time Processing**: Live payment tracking, instant balance updates, and rate notifications
+- **📈 Observability**: Prometheus metrics with Grafana dashboards for operational insights
+
+### Development Milestones
+
+- ✅ **M1**: Core payment and ledger functionality with double-entry accounting system
+- ✅ **M2**: Event-driven architecture with Kafka, Outbox/Inbox patterns, and saga orchestration
+- ✅ **M3**: Multi-currency accounts, real-time FX engine, treasury risk management, and AML compliance
 
 ## System Architecture
 
@@ -109,52 +124,86 @@ MiniBank is a full-stack banking platform built with modern technologies and arc
 │   ├── src/app/                    # Next.js App Router pages
 │   ├── src/components/             # Reusable UI components
 │   ├── src/lib/api/                # Typed API clients
+│   ├── tests/                      # E2E and component tests
 │   └── README.md                   # Frontend documentation
-├── grafana/dashboards/             # Grafana dashboard configurations
-├── helm/minibank-services/         # Kubernetes deployment manifests
-└── docker/                         # Docker configurations
+├── grafana/                        # Grafana dashboard configurations
+│   ├── dashboards/                 # JSON dashboard definitions
+│   └── prometheus.yml              # Prometheus configuration
+├── docker-compose.yml              # Local development infrastructure
+└── .claude/                        # Claude Code configuration
 ```
 
-## Getting Started (Local Development)
+## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
 
-- **Java 21** (OpenJDK or Oracle JDK)
-- **Node.js 18+** and **pnpm**
-- **Docker** and **Docker Compose**
-- **PostgreSQL 16+**
-- **Redis 7+**
-- **Apache Kafka 3.x**
+Ensure you have the following installed on your development machine:
 
-### Backend Setup
+- **Java 21** (OpenJDK or Oracle JDK) - Required for backend compilation and runtime
+- **Node.js 18+** and **pnpm** - Frontend package management and build tools
+- **Docker** and **Docker Compose** - Container orchestration for infrastructure services
+- **Git** - Version control system
 
-1. **Clone the repository**
+### 🐳 Quick Start with Docker
+
+The fastest way to get MiniBank running locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/mariocodecr/MiniBank.git
+cd MiniBank
+
+# Start all infrastructure services
+docker-compose up -d
+
+# Build and run the backend
+./gradlew bootRun
+
+# In a new terminal, start the frontend
+cd frontend && pnpm install && pnpm dev
+```
+
+🎉 **You're ready!** Visit:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **Keycloak Admin**: http://localhost:8082 (admin/admin)
+
+### 🔧 Manual Setup
+
+#### Backend Setup
+
+1. **Clone and navigate to repository**
    ```bash
-   git clone <repository-url>
-   cd minibank
+   git clone https://github.com/mariocodecr/MiniBank.git
+   cd MiniBank
    ```
 
 2. **Start infrastructure services**
    ```bash
-   # Start PostgreSQL, Redis, and Kafka
-   docker-compose up -d postgres redis kafka
+   # Start PostgreSQL, Redis, Kafka, and Keycloak
+   docker-compose up -d postgres redis kafka zookeeper keycloak
+
+   # Wait for services to be ready (check with docker-compose ps)
    ```
 
-3. **Build and run the backend**
+3. **Configure environment**
    ```bash
-   # Build the application
-   ./gradlew build
-   
-   # Run database migrations
-   ./gradlew flywayMigrate
-   
-   # Start the application
+   # Backend configuration is in src/main/resources/application.properties
+   # Default configuration works with Docker Compose setup
+   ```
+
+4. **Build and run the backend**
+   ```bash
+   # Clean build with tests
+   ./gradlew clean build
+
+   # Start the Spring Boot application
    ./gradlew bootRun
    ```
 
-   Backend will be available at `http://localhost:8080`
+   🌐 Backend will be available at `http://localhost:8080`
 
-### Frontend Setup
+#### Frontend Setup
 
 1. **Navigate to frontend directory**
    ```bash
@@ -169,7 +218,10 @@ MiniBank is a full-stack banking platform built with modern technologies and arc
 3. **Configure environment variables**
    ```bash
    cp .env.example .env.local
-   # Edit .env.local with your configuration
+
+   # Generate secure secrets
+   openssl rand -base64 32  # Use output for NEXTAUTH_SECRET
+   openssl rand -hex 32     # Use output for KEYCLOAK_CLIENT_SECRET
    ```
 
 4. **Start development server**
@@ -177,24 +229,57 @@ MiniBank is a full-stack banking platform built with modern technologies and arc
    pnpm dev
    ```
 
-   Frontend will be available at `http://localhost:3000`
+   🌐 Frontend will be available at `http://localhost:3000`
 
-### Environment Variables (.env.local)
+### 🔐 Environment Variables (.env.local)
+
+Create a `.env.local` file in the `frontend/` directory with the following configuration:
 
 ```bash
 # API Configuration
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 NEXT_PUBLIC_API_VERSION=v1
 
-# Authentication
+# Authentication - REQUIRED
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-nextauth-secret-here
+# Generate with: openssl rand -base64 32
+NEXTAUTH_SECRET=your-secure-nextauth-secret-here-minimum-32-characters
 
-# Keycloak OIDC Configuration
-NEXT_PUBLIC_KEYCLOAK_ISSUER=http://localhost:8081/realms/minibank
+# Keycloak OIDC Configuration - REQUIRED
+NEXT_PUBLIC_KEYCLOAK_ISSUER=http://localhost:8082/realms/minibank
 NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=minibank-web
-KEYCLOAK_CLIENT_SECRET=your-keycloak-client-secret
+# Generate with: openssl rand -hex 32
+KEYCLOAK_CLIENT_SECRET=your-secure-keycloak-client-secret
+
+# Development Environment
+NODE_ENV=development
+NEXT_TELEMETRY_DISABLED=1
+
+# Security Configuration
+NEXTAUTH_SESSION_MAX_AGE=86400  # 24 hours
+NEXTAUTH_COOKIE_SECURE=false   # Set to true in production
 ```
+
+> ⚠️ **Security Note**: Never commit `.env.local` files to version control. The secrets shown above are examples only.
+
+### 👥 Demo Users & Authentication
+
+Once Keycloak is running, you can access the application with these pre-configured demo users:
+
+| Username | Password | Role | Description |
+|----------|----------|------|-------------|
+| `testuser` | `testuser` | **Customer** | Standard user with payment and account access |
+| `mario` | `mario` | **Customer** | Standard user for testing multi-user scenarios |
+| `admin` | `admin` | **Administrator** | Admin access to all features and settings |
+
+**Login Process**:
+1. Visit http://localhost:3000
+2. Click "Sign In"
+3. You'll be redirected to Keycloak
+4. Use any of the credentials above
+5. After successful authentication, you'll return to the MiniBank dashboard
+
+**Keycloak Admin Console**: Access at http://localhost:8082 with `admin/admin` for user management.
 
 ## Backend Details
 
@@ -336,15 +421,24 @@ pnpm test
 pnpm typecheck
 ```
 
-## Observability & Operations
+## 📊 Observability & Operations
 
 ### Prometheus/Grafana Dashboards
 
-Access dashboards at `http://localhost:3000` (admin/admin)
+Access monitoring dashboards at `http://localhost:3001` (admin/admin)
 
-- **FX & Treasury Dashboard**: Real-time exchange rates, currency exposure monitoring, risk alerts
-- **Payment Metrics**: Success rates, P95 latency, volume trends, saga completion rates
-- **System Health**: JVM metrics, database connections, cache hit rates
+**Available Dashboards**:
+- **🏦 MiniBank M1 Dashboard**: Core payment metrics, system health, ledger statistics
+- **💱 FX & Treasury Dashboard**: Real-time exchange rates, currency exposure monitoring, risk alerts
+- **🔍 Payment Metrics**: Success rates, P95 latency, volume trends, saga completion rates
+- **⚡ System Health**: JVM metrics, database connections, cache hit rates, API response times
+
+**Pre-configured Grafana Features**:
+- Real-time payment success rate monitoring
+- Cross-currency payment saga tracking
+- FX rate provider health checks
+- Account balance distribution analytics
+- System resource utilization graphs
 
 ### Key Business Metrics
 
@@ -464,10 +558,87 @@ pnpm codegen:payments
 pnpm codegen:accounts
 ```
 
-## License
+## ✨ Key Features Showcase
+
+### 🔐 Secure Authentication
+- **NextAuth.js + Keycloak**: Enterprise-grade OIDC authentication flow
+- **JWT Token Management**: Secure token refresh with automatic retry logic
+- **Role-Based Access Control**: Different UI views based on user permissions
+
+### 💳 Account Management
+- **Multi-Currency Accounts**: Support for USD, EUR, GBP, CRC, and more currencies
+- **Real-Time Balances**: Live balance updates with WebSocket connections
+- **Transaction History**: Comprehensive audit trail with filters and search
+- **Account Settings**: Personalized preferences and security controls
+
+### 💸 Payment Processing
+- **Instant Payments**: Same-currency transfers with immediate settlement
+- **Cross-Currency Payments**: FX conversion with real-time rate locking
+- **Payment Status Tracking**: Real-time payment lifecycle with visual timeline
+- **Saga Orchestration**: Reliable distributed transaction handling
+
+### 📈 Financial Dashboard
+- **Payment Analytics**: Success rates, volume trends, and performance metrics
+- **FX Rate Monitoring**: Live exchange rates with historical charts
+- **System Health**: Real-time monitoring of all microservices
+- **Treasury Management**: Currency exposure and risk monitoring
+
+### 🛡️ Security & Compliance
+- **AML Screening**: Automated anti-money laundering checks
+- **Audit Trails**: Comprehensive logging for regulatory compliance
+- **Data Protection**: GDPR-compliant data handling and retention
+- **Rate Limiting**: API protection against abuse and DoS attacks
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines:
+
+### Code Style Guidelines
+
+- **Java**: Google Java Style Guide with Clean Architecture principles
+- **TypeScript**: ESLint + Prettier with strict TypeScript configuration
+- **Commits**: Conventional commit messages (`feat:`, `fix:`, `docs:`)
+- **Testing**: Comprehensive test coverage for new features
+
+### Pull Request Checklist
+
+- [ ] All tests pass (`./gradlew test` and `pnpm test`)
+- [ ] Code follows style guidelines (`./gradlew spotlessCheck` and `pnpm lint`)
+- [ ] Documentation updated for new features
+- [ ] OpenAPI specs updated for API changes
+- [ ] Database migrations included if schema changes
+- [ ] Frontend types regenerated if backend API changes (`pnpm codegen`)
+
+### Development Commands
+
+```bash
+# Backend
+./gradlew build           # Full build with tests
+./gradlew test            # Run unit tests
+./gradlew bootRun         # Start application
+./gradlew spotlessCheck   # Check code style
+
+# Frontend
+pnpm install              # Install dependencies
+pnpm dev                  # Start development server
+pnpm build                # Production build
+pnpm test                 # Run tests
+pnpm lint                 # Check code style
+pnpm typecheck            # TypeScript validation
+```
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 📞 Support & Contact
+
+- **Issues**: [GitHub Issues](https://github.com/mariocodecr/MiniBank/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/mariocodecr/MiniBank/discussions)
+- **Email**: mario@minibank.dev
+
 ---
 
-**Built with ❤️ for modern banking infrastructure**
+**🏦 Built with ❤️ for modern banking infrastructure by [@mariocodecr](https://github.com/mariocodecr)**
+
+> *"Demonstrating enterprise-grade financial software architecture with modern technologies and best practices."*
