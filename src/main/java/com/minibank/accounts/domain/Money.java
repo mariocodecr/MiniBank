@@ -24,9 +24,7 @@ public class Money {
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Money amount cannot be negative");
         }
-        return new Money(amount.multiply(BigDecimal.valueOf(100))
-                .setScale(0, RoundingMode.HALF_UP)
-                .longValue(), currency);
+        return new Money(toMinorUnits(amount, currency), currency);
     }
 
     public static Money zero(Currency currency) {
@@ -34,7 +32,8 @@ public class Money {
     }
 
     public BigDecimal getAmount() {
-        return BigDecimal.valueOf(minorUnits).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        return BigDecimal.valueOf(minorUnits)
+            .divide(scalingFactor(currency), currency.getDecimalPlaces(), RoundingMode.HALF_UP);
     }
 
     public Money add(Money other) {
@@ -100,5 +99,23 @@ public class Money {
                 "Cannot perform operation on different currencies: " + 
                 this.currency + " and " + other.currency);
         }
+    }
+
+    private static long toMinorUnits(BigDecimal amount, Currency currency) {
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Money amount cannot be negative");
+        }
+
+        BigDecimal scaled = amount.multiply(scalingFactor(currency))
+            .setScale(0, RoundingMode.HALF_UP);
+        try {
+            return scaled.longValueExact();
+        } catch (ArithmeticException ex) {
+            throw new IllegalArgumentException("Money amount is too large", ex);
+        }
+    }
+
+    private static BigDecimal scalingFactor(Currency currency) {
+        return BigDecimal.TEN.pow(currency.getDecimalPlaces());
     }
 }

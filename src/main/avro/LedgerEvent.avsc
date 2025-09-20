@@ -1,0 +1,61 @@
+{
+  "type": "record",
+  "name": "LedgerEvent",
+  "namespace": "com.minibank.events.ledger", 
+  "doc": "Ledger operation events for payment completion",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string",
+      "doc": "Unique identifier for this event instance"
+    },
+    {
+      "name": "paymentId",
+      "type": "string",
+      "doc": "Payment identifier this event relates to"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "LedgerEventType",
+        "symbols": [
+          "LEDGER_ENTRIES_RECORDED",
+          "LEDGER_RECORDING_FAILED"
+        ]
+      },
+      "doc": "Type of ledger event"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis", 
+      "doc": "Event occurrence timestamp"
+    },
+    {
+      "name": "correlationId",
+      "type": "string",
+      "doc": "Correlation ID for tracing"
+    },
+    {
+      "name": "entryIds",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "default": [],
+      "doc": "IDs of created ledger entries"
+    },
+    {
+      "name": "totalEntries",
+      "type": "int",
+      "doc": "Total number of entries created (should be 2 for double-entry)"
+    },
+    {
+      "name": "failureReason",
+      "type": ["null", "string"], 
+      "default": null,
+      "doc": "Failure reason if event indicates failure"
+    }
+  ]
+}

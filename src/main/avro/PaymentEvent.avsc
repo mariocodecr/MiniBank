@@ -1,0 +1,82 @@
+{
+  "type": "record",
+  "name": "PaymentEvent",
+  "namespace": "com.minibank.events.payment",
+  "doc": "Payment lifecycle events for event-driven saga orchestration",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string",
+      "doc": "Unique identifier for this event instance"
+    },
+    {
+      "name": "paymentId", 
+      "type": "string",
+      "doc": "Payment identifier this event relates to"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "PaymentEventType",
+        "symbols": [
+          "PAYMENT_REQUESTED",
+          "PAYMENT_DEBITED", 
+          "PAYMENT_CREDITED",
+          "PAYMENT_COMPLETED",
+          "PAYMENT_FAILED",
+          "PAYMENT_COMPENSATED"
+        ]
+      },
+      "doc": "Type of payment event"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Event occurrence timestamp"
+    },
+    {
+      "name": "correlationId",
+      "type": "string", 
+      "doc": "Correlation ID for tracing across services"
+    },
+    {
+      "name": "requestId",
+      "type": "string",
+      "doc": "Original client request identifier for idempotency"
+    },
+    {
+      "name": "fromAccountId",
+      "type": "string",
+      "doc": "Source account identifier"
+    },
+    {
+      "name": "toAccountId", 
+      "type": "string",
+      "doc": "Destination account identifier"
+    },
+    {
+      "name": "amountMinor",
+      "type": "long",
+      "doc": "Payment amount in minor currency units"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "doc": "Payment currency code"
+    },
+    {
+      "name": "failureReason",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Failure reason if event indicates failure"
+    },
+    {
+      "name": "compensationRequired",
+      "type": "boolean",
+      "default": false,
+      "doc": "Whether this failure requires compensation"
+    }
+  ]
+}

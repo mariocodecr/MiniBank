@@ -35,3 +35,45 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Node.js / Frontend ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js
+.next/
+out/
+dist/
+
+# Environment variables
+.env*.local
+
+# Misc
+*.tsbuildinfo
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Logs
+logs
+*.log

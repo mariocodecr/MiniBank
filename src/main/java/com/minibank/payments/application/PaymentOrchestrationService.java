@@ -5,7 +5,9 @@ import com.minibank.accounts.domain.Money;
 import com.minibank.payments.adapter.client.AccountServiceClient;
 import com.minibank.payments.adapter.client.LedgerServiceClient;
 import com.minibank.payments.domain.*;
+import com.minibank.payments.domain.events.PaymentDomainEvent;
 import com.minibank.payments.infrastructure.IdempotencyService;
+import com.minibank.payments.infrastructure.events.OutboxEventPublisher;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -26,6 +28,7 @@ public class PaymentOrchestrationService {
     private final IdempotencyService idempotencyService;
     private final AccountServiceClient accountServiceClient;
     private final LedgerServiceClient ledgerServiceClient;
+    private final OutboxEventPublisher eventPublisher;
     
     // Metrics
     private final Counter paymentsInitiated;
@@ -38,11 +41,13 @@ public class PaymentOrchestrationService {
                                      IdempotencyService idempotencyService,
                                      AccountServiceClient accountServiceClient,
                                      LedgerServiceClient ledgerServiceClient,
+                                     OutboxEventPublisher eventPublisher,
                                      MeterRegistry meterRegistry) {
         this.paymentRepository = paymentRepository;
         this.idempotencyService = idempotencyService;
         this.accountServiceClient = accountServiceClient;
         this.ledgerServiceClient = ledgerServiceClient;
+        this.eventPublisher = eventPublisher;
         this.meterRegistry = meterRegistry;
         
         // Initialize metrics
@@ -84,6 +89,18 @@ public class PaymentOrchestrationService {
             // Register idempotency
             idempotencyService.registerPayment(requestId, savedPayment.getId());
             
+            // Publish payment initiated event
+            PaymentDomainEvent initiatedEvent = PaymentDomainEvent.paymentInitiated(
+                savedPayment.getId(), 
+                savedPayment.getFromAccountId(),
+                savedPayment.getToAccountId(),
+                savedPayment.getAmountMinor(),
+                savedPayment.getCurrency().name(),
+                savedPayment.getRequestId(),
+                null
+            );
+            eventPublisher.publishEvent(initiatedEvent);
+            
             paymentsInitiated.increment();
             
             // Start saga orchestration asynchronously (for now, synchronously)
@@ -109,6 +126,19 @@ public class PaymentOrchestrationService {
                 if (reserveResult.isSuccess()) {
                     payment.markAsDebited();
                     paymentRepository.save(payment);
+                    
+                    // Publish payment debited event
+                    PaymentDomainEvent debitedEvent = PaymentDomainEvent.paymentDebited(
+                        payment.getId(),
+                        payment.getFromAccountId(),
+                        payment.getToAccountId(),
+                        payment.getAmountMinor(),
+                        payment.getCurrency().name(),
+                        payment.getRequestId(),
+                        null
+                    );
+                    eventPublisher.publishEvent(debitedEvent);
+                    
                     logger.info("Payment {} debited successfully", payment.getId());
                 } else {
                     handleDebitFailure(payment, reserveResult.getErrorMessage());
@@ -125,6 +155,19 @@ public class PaymentOrchestrationService {
                 if (creditResult.isSuccess()) {
                     payment.markAsCredited();
                     paymentRepository.save(payment);
+                    
+                    // Publish payment credited event
+                    PaymentDomainEvent creditedEvent = PaymentDomainEvent.paymentCredited(
+                        payment.getId(),
+                        payment.getFromAccountId(),
+                        payment.getToAccountId(),
+                        payment.getAmountMinor(),
+                        payment.getCurrency().name(),
+                        payment.getRequestId(),
+                        null
+                    );
+                    eventPublisher.publishEvent(creditedEvent);
+                    
                     logger.info("Payment {} credited successfully", payment.getId());
                 } else {
                     handleCreditFailure(payment, creditResult.getErrorMessage());
@@ -146,6 +189,19 @@ public class PaymentOrchestrationService {
                 if (ledgerResult.isSuccess()) {
                     payment.markAsCompleted();
                     paymentRepository.save(payment);
+                    
+                    // Publish payment completed event
+                    PaymentDomainEvent completedEvent = PaymentDomainEvent.paymentCompleted(
+                        payment.getId(),
+                        payment.getFromAccountId(),
+                        payment.getToAccountId(),
+                        payment.getAmountMinor(),
+                        payment.getCurrency().name(),
+                        payment.getRequestId(),
+                        null
+                    );
+                    eventPublisher.publishEvent(completedEvent);
+                    
                     paymentsCompleted.increment();
                     logger.info("Payment {} completed successfully", payment.getId());
                 } else {
@@ -166,6 +222,19 @@ public class PaymentOrchestrationService {
         PaymentStatus failureStatus = determineFailureStatus(errorMessage);
         payment.markAsFailed(failureStatus, errorMessage);
         paymentRepository.save(payment);
+        
+        // Publish payment failed event
+        PaymentDomainEvent failedEvent = PaymentDomainEvent.paymentFailed(
+            payment.getId(),
+            payment.getFromAccountId(),
+            payment.getToAccountId(),
+            payment.getAmountMinor(),
+            payment.getCurrency().name(),
+            payment.getRequestId(),
+            failureStatus.name(),
+            errorMessage
+        );
+        eventPublisher.publishEvent(failedEvent);
         
         Counter.builder("payments.failed.total")
             .tag("reason", "debit_failed")
@@ -222,6 +291,19 @@ public class PaymentOrchestrationService {
             if (result.isSuccess()) {
                 payment.markAsCompensated();
                 paymentRepository.save(payment);
+                
+                // Publish payment compensated event
+                PaymentDomainEvent compensatedEvent = PaymentDomainEvent.paymentCompensated(
+                    payment.getId(),
+                    payment.getFromAccountId(),
+                    payment.getToAccountId(),
+                    payment.getAmountMinor(),
+                    payment.getCurrency().name(),
+                    payment.getRequestId(),
+                    "Credit failure compensation"
+                );
+                eventPublisher.publishEvent(compensatedEvent);
+                
                 paymentsCompensated.increment();
                 logger.info("Payment {} compensated successfully", payment.getId());
             } else {

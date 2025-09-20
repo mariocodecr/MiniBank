@@ -1,0 +1,75 @@
+{
+  "type": "record",
+  "name": "AccountEvent", 
+  "namespace": "com.minibank.events.account",
+  "doc": "Account operation events for payment saga",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string",
+      "doc": "Unique identifier for this event instance"
+    },
+    {
+      "name": "accountId",
+      "type": "string", 
+      "doc": "Account identifier this event relates to"
+    },
+    {
+      "name": "paymentId",
+      "type": "string",
+      "doc": "Related payment identifier"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "AccountEventType", 
+        "symbols": [
+          "ACCOUNT_CREATED",
+          "CURRENCY_ENABLED",
+          "ACCOUNT_DEBITED",
+          "ACCOUNT_CREDITED",
+          "ACCOUNT_DEBIT_FAILED",
+          "ACCOUNT_CREDIT_FAILED",
+          "BALANCE_CREDITED",
+          "BALANCE_DEBITED",
+          "BALANCE_RESERVED",
+          "BALANCE_RELEASED"
+        ]
+      },
+      "doc": "Type of account event"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Event occurrence timestamp"
+    },
+    {
+      "name": "correlationId",
+      "type": "string",
+      "doc": "Correlation ID for tracing"
+    },
+    {
+      "name": "amountMinor",
+      "type": "long", 
+      "doc": "Transaction amount in minor currency units"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "doc": "Transaction currency code"
+    },
+    {
+      "name": "balanceMinor",
+      "type": "long",
+      "doc": "Account balance after operation in minor units"
+    },
+    {
+      "name": "failureReason",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Failure reason if event indicates failure"
+    }
+  ]
+}

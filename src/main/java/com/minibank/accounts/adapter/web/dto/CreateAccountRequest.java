@@ -1,9 +1,10 @@
 package com.minibank.accounts.adapter.web.dto;
 
-import com.minibank.accounts.domain.Currency;
-import jakarta.validation.constraints.NotNull;
-
 import java.util.UUID;
+
+import com.minibank.accounts.domain.Currency;
+
+import jakarta.validation.constraints.NotNull;
 
 public class CreateAccountRequest {
     @NotNull(message = "User ID is required")
@@ -23,7 +24,15 @@ public class CreateAccountRequest {
         return userId;
     }
     
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+    
     public Currency getCurrency() {
         return currency;
+    }
+    
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }
