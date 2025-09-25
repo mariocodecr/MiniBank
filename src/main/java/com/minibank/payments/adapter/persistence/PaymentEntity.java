@@ -1,6 +1,5 @@
 package com.minibank.payments.adapter.persistence;
 
-import com.minibank.accounts.domain.Currency;
 import com.minibank.payments.domain.PaymentStatus;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -29,11 +28,7 @@ public class PaymentEntity {
     
     @Column(name = "amount_minor", nullable = false)
     private Long amountMinor;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
-    private Currency currency;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
@@ -57,14 +52,13 @@ public class PaymentEntity {
     public PaymentEntity() {}
 
     public PaymentEntity(UUID id, String requestId, UUID fromAccountId, UUID toAccountId,
-                        Long amountMinor, Currency currency, PaymentStatus status,
+                        Long amountMinor, PaymentStatus status,
                         String failureReason, Long version, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.requestId = requestId;
         this.fromAccountId = fromAccountId;
         this.toAccountId = toAccountId;
         this.amountMinor = amountMinor;
-        this.currency = currency;
         this.status = status;
         this.failureReason = failureReason;
         this.version = version;
@@ -87,9 +81,6 @@ public class PaymentEntity {
 
     public Long getAmountMinor() { return amountMinor; }
     public void setAmountMinor(Long amountMinor) { this.amountMinor = amountMinor; }
-
-    public Currency getCurrency() { return currency; }
-    public void setCurrency(Currency currency) { this.currency = currency; }
 
     public PaymentStatus getStatus() { return status; }
     public void setStatus(PaymentStatus status) { this.status = status; }
