@@ -5,6 +5,7 @@ import com.minibank.fx.domain.FXConversionRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +77,6 @@ public class FXConversionRepositoryImpl implements FXConversionRepository {
             conversion.getFromAmountMinor(),
             conversion.getToAmountMinor(),
             conversion.getExchangeRate(),
-            conversion.getSpread(),
             conversion.getProvider(),
             conversion.getTimestamp(),
             conversion.getCorrelationId()
@@ -84,16 +84,21 @@ public class FXConversionRepositoryImpl implements FXConversionRepository {
     }
 
     private FXConversion toDomain(FXConversionEntity entity) {
+        // Get spread from provider entity relationship
+        BigDecimal spread = entity.getProvider() != null ?
+            entity.getProvider().getDefaultSpread() :
+            BigDecimal.valueOf(0.0025); // fallback spread
+
         return FXConversion.fromEntity(
             entity.getId(),
             entity.getAccountId(),
-            entity.getFromCurrency(),
-            entity.getToCurrency(),
+            entity.getFromCurrencyCode(),
+            entity.getToCurrencyCode(),
             entity.getFromAmountMinor(),
             entity.getToAmountMinor(),
             entity.getExchangeRate(),
-            entity.getSpread(),
-            entity.getProvider(),
+            spread,
+            entity.getProviderCode(),
             entity.getTimestamp(),
             entity.getCorrelationId()
         );
