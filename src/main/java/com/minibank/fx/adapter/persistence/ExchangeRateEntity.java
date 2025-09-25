@@ -1,5 +1,6 @@
 package com.minibank.fx.adapter.persistence;
 
+import com.minibank.accounts.adapter.persistence.SupportedCurrencyEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -9,33 +10,42 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "fx_rates", 
+@Table(name = "exchange_rates",
        indexes = {
-           @Index(name = "idx_fx_rates_pair", columnList = "base_currency, quote_currency"),
-           @Index(name = "idx_fx_rates_provider", columnList = "provider"),
-           @Index(name = "idx_fx_rates_timestamp", columnList = "timestamp"),
-           @Index(name = "idx_fx_rates_valid_until", columnList = "valid_until")
+           @Index(name = "idx_exchange_rates_pair", columnList = "base_currency_code, quote_currency_code"),
+           @Index(name = "idx_exchange_rates_provider", columnList = "provider_code"),
+           @Index(name = "idx_exchange_rates_timestamp", columnList = "timestamp"),
+           @Index(name = "idx_exchange_rates_valid_until", columnList = "valid_until")
        })
 public class ExchangeRateEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "base_currency", nullable = false, length = 3)
-    private String baseCurrency;
+    @Column(name = "base_currency_code", nullable = false, length = 3)
+    private String baseCurrencyCode;
 
-    @Column(name = "quote_currency", nullable = false, length = 3)
-    private String quoteCurrency;
+    @Column(name = "quote_currency_code", nullable = false, length = 3)
+    private String quoteCurrencyCode;
 
     @Column(nullable = false, precision = 15, scale = 8)
     private BigDecimal rate;
 
-    @Column(nullable = false, precision = 15, scale = 8)
-    private BigDecimal spread;
+    @Column(name = "provider_code", nullable = false, length = 20)
+    private String providerCode;
 
-    @Column(nullable = false, length = 50)
-    private String provider;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "base_currency_code", referencedColumnName = "currency_code", insertable = false, updatable = false)
+    private SupportedCurrencyEntity baseCurrency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quote_currency_code", referencedColumnName = "currency_code", insertable = false, updatable = false)
+    private SupportedCurrencyEntity quoteCurrency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_code", referencedColumnName = "provider_code", insertable = false, updatable = false)
+    private FXProviderEntity provider;
 
     @Column(nullable = false)
     private Instant timestamp;
@@ -49,14 +59,13 @@ public class ExchangeRateEntity {
 
     protected ExchangeRateEntity() {}
 
-    public ExchangeRateEntity(UUID id, String baseCurrency, String quoteCurrency, BigDecimal rate,
-                             BigDecimal spread, String provider, Instant timestamp, Instant validUntil) {
+    public ExchangeRateEntity(UUID id, String baseCurrencyCode, String quoteCurrencyCode, BigDecimal rate,
+                             String providerCode, Instant timestamp, Instant validUntil) {
         this.id = id;
-        this.baseCurrency = baseCurrency;
-        this.quoteCurrency = quoteCurrency;
+        this.baseCurrencyCode = baseCurrencyCode;
+        this.quoteCurrencyCode = quoteCurrencyCode;
         this.rate = rate;
-        this.spread = spread;
-        this.provider = provider;
+        this.providerCode = providerCode;
         this.timestamp = timestamp;
         this.validUntil = validUntil;
     }
@@ -69,19 +78,35 @@ public class ExchangeRateEntity {
         this.id = id;
     }
 
-    public String getBaseCurrency() {
+    public String getBaseCurrencyCode() {
+        return baseCurrencyCode;
+    }
+
+    public void setBaseCurrencyCode(String baseCurrencyCode) {
+        this.baseCurrencyCode = baseCurrencyCode;
+    }
+
+    public String getQuoteCurrencyCode() {
+        return quoteCurrencyCode;
+    }
+
+    public void setQuoteCurrencyCode(String quoteCurrencyCode) {
+        this.quoteCurrencyCode = quoteCurrencyCode;
+    }
+
+    public SupportedCurrencyEntity getBaseCurrency() {
         return baseCurrency;
     }
 
-    public void setBaseCurrency(String baseCurrency) {
+    public void setBaseCurrency(SupportedCurrencyEntity baseCurrency) {
         this.baseCurrency = baseCurrency;
     }
 
-    public String getQuoteCurrency() {
+    public SupportedCurrencyEntity getQuoteCurrency() {
         return quoteCurrency;
     }
 
-    public void setQuoteCurrency(String quoteCurrency) {
+    public void setQuoteCurrency(SupportedCurrencyEntity quoteCurrency) {
         this.quoteCurrency = quoteCurrency;
     }
 
@@ -93,19 +118,19 @@ public class ExchangeRateEntity {
         this.rate = rate;
     }
 
-    public BigDecimal getSpread() {
-        return spread;
+    public String getProviderCode() {
+        return providerCode;
     }
 
-    public void setSpread(BigDecimal spread) {
-        this.spread = spread;
+    public void setProviderCode(String providerCode) {
+        this.providerCode = providerCode;
     }
 
-    public String getProvider() {
+    public FXProviderEntity getProvider() {
         return provider;
     }
 
-    public void setProvider(String provider) {
+    public void setProvider(FXProviderEntity provider) {
         this.provider = provider;
     }
 
@@ -144,7 +169,7 @@ public class ExchangeRateEntity {
 
     @Override
     public String toString() {
-        return String.format("ExchangeRateEntity{id=%s, %s/%s=%s, provider=%s, valid=%s}", 
-                           id, baseCurrency, quoteCurrency, rate, provider, validUntil);
+        return String.format("ExchangeRateEntity{id=%s, %s/%s=%s, provider=%s, valid=%s}",
+                           id, baseCurrencyCode, quoteCurrencyCode, rate, providerCode, validUntil);
     }
 }
