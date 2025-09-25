@@ -1,5 +1,6 @@
 package com.minibank.fx.adapter.persistence;
 
+import com.minibank.accounts.adapter.persistence.SupportedCurrencyEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,12 +13,12 @@ import java.util.UUID;
 @Table(name = "fx_conversions",
        indexes = {
            @Index(name = "idx_fx_conversions_account", columnList = "account_id"),
-           @Index(name = "idx_fx_conversions_pair", columnList = "from_currency, to_currency"),
+           @Index(name = "idx_fx_conversions_pair", columnList = "from_currency_code, to_currency_code"),
            @Index(name = "idx_fx_conversions_correlation", columnList = "correlation_id"),
            @Index(name = "idx_fx_conversions_timestamp", columnList = "timestamp")
        })
 public class FXConversionEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,11 +26,11 @@ public class FXConversionEntity {
     @Column(name = "account_id", nullable = false)
     private UUID accountId;
 
-    @Column(name = "from_currency", nullable = false, length = 3)
-    private String fromCurrency;
+    @Column(name = "from_currency_code", nullable = false, length = 3)
+    private String fromCurrencyCode;
 
-    @Column(name = "to_currency", nullable = false, length = 3)
-    private String toCurrency;
+    @Column(name = "to_currency_code", nullable = false, length = 3)
+    private String toCurrencyCode;
 
     @Column(name = "from_amount_minor", nullable = false)
     private Long fromAmountMinor;
@@ -40,11 +41,20 @@ public class FXConversionEntity {
     @Column(name = "exchange_rate", nullable = false, precision = 15, scale = 8)
     private BigDecimal exchangeRate;
 
-    @Column(nullable = false, precision = 15, scale = 8)
-    private BigDecimal spread;
+    @Column(name = "provider_code", nullable = false, length = 20)
+    private String providerCode;
 
-    @Column(nullable = false, length = 50)
-    private String provider;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_currency_code", referencedColumnName = "currency_code", insertable = false, updatable = false)
+    private SupportedCurrencyEntity fromCurrency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_currency_code", referencedColumnName = "currency_code", insertable = false, updatable = false)
+    private SupportedCurrencyEntity toCurrency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_code", referencedColumnName = "provider_code", insertable = false, updatable = false)
+    private FXProviderEntity provider;
 
     @Column(nullable = false)
     private Instant timestamp;
@@ -58,18 +68,17 @@ public class FXConversionEntity {
 
     protected FXConversionEntity() {}
 
-    public FXConversionEntity(UUID id, UUID accountId, String fromCurrency, String toCurrency,
+    public FXConversionEntity(UUID id, UUID accountId, String fromCurrencyCode, String toCurrencyCode,
                              Long fromAmountMinor, Long toAmountMinor, BigDecimal exchangeRate,
-                             BigDecimal spread, String provider, Instant timestamp, String correlationId) {
+                             String providerCode, Instant timestamp, String correlationId) {
         this.id = id;
         this.accountId = accountId;
-        this.fromCurrency = fromCurrency;
-        this.toCurrency = toCurrency;
+        this.fromCurrencyCode = fromCurrencyCode;
+        this.toCurrencyCode = toCurrencyCode;
         this.fromAmountMinor = fromAmountMinor;
         this.toAmountMinor = toAmountMinor;
         this.exchangeRate = exchangeRate;
-        this.spread = spread;
-        this.provider = provider;
+        this.providerCode = providerCode;
         this.timestamp = timestamp;
         this.correlationId = correlationId;
     }
@@ -90,19 +99,35 @@ public class FXConversionEntity {
         this.accountId = accountId;
     }
 
-    public String getFromCurrency() {
+    public String getFromCurrencyCode() {
+        return fromCurrencyCode;
+    }
+
+    public void setFromCurrencyCode(String fromCurrencyCode) {
+        this.fromCurrencyCode = fromCurrencyCode;
+    }
+
+    public String getToCurrencyCode() {
+        return toCurrencyCode;
+    }
+
+    public void setToCurrencyCode(String toCurrencyCode) {
+        this.toCurrencyCode = toCurrencyCode;
+    }
+
+    public SupportedCurrencyEntity getFromCurrency() {
         return fromCurrency;
     }
 
-    public void setFromCurrency(String fromCurrency) {
+    public void setFromCurrency(SupportedCurrencyEntity fromCurrency) {
         this.fromCurrency = fromCurrency;
     }
 
-    public String getToCurrency() {
+    public SupportedCurrencyEntity getToCurrency() {
         return toCurrency;
     }
 
-    public void setToCurrency(String toCurrency) {
+    public void setToCurrency(SupportedCurrencyEntity toCurrency) {
         this.toCurrency = toCurrency;
     }
 
@@ -130,19 +155,19 @@ public class FXConversionEntity {
         this.exchangeRate = exchangeRate;
     }
 
-    public BigDecimal getSpread() {
-        return spread;
+    public String getProviderCode() {
+        return providerCode;
     }
 
-    public void setSpread(BigDecimal spread) {
-        this.spread = spread;
+    public void setProviderCode(String providerCode) {
+        this.providerCode = providerCode;
     }
 
-    public String getProvider() {
+    public FXProviderEntity getProvider() {
         return provider;
     }
 
-    public void setProvider(String provider) {
+    public void setProvider(FXProviderEntity provider) {
         this.provider = provider;
     }
 
@@ -181,7 +206,7 @@ public class FXConversionEntity {
 
     @Override
     public String toString() {
-        return String.format("FXConversionEntity{id=%s, %s->%s, %d->%d, account=%s}", 
-                           id, fromCurrency, toCurrency, fromAmountMinor, toAmountMinor, accountId);
+        return String.format("FXConversionEntity{id=%s, %s->%s, %d->%d, account=%s}",
+                           id, fromCurrencyCode, toCurrencyCode, fromAmountMinor, toAmountMinor, accountId);
     }
 }
