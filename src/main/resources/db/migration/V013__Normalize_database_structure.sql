@@ -20,28 +20,60 @@ INSERT INTO fx_providers (provider_code, provider_name, default_spread, priority
 ('CURRENCYLAYER', 'CurrencyLayer', 0.0028, 3, 60);
 
 -- Step 2: Rename and normalize currency tables
--- Rename supported_currencies to currencies for consistency
-ALTER TABLE supported_currencies RENAME TO currencies;
+-- Rename supported_currencies to currencies for consistency (if exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'supported_currencies') THEN
+        ALTER TABLE supported_currencies RENAME TO currencies;
+    END IF;
+END $$;
 
 -- Step 3: Normalize account_currency_balances table
--- First, rename table and fix structure
-ALTER TABLE account_currency_balances RENAME TO account_balances;
+-- First, rename table and fix structure (if exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'account_currency_balances') THEN
+        ALTER TABLE account_currency_balances RENAME TO account_balances;
+    END IF;
+END $$;
 
--- Add foreign key constraint to currencies
-ALTER TABLE account_balances
-    RENAME COLUMN currency TO currency_code;
+-- Add foreign key constraint to currencies (rename column if needed)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'account_balances' AND column_name = 'currency') THEN
+        ALTER TABLE account_balances RENAME COLUMN currency TO currency_code;
+    END IF;
+END $$;
 
-ALTER TABLE account_balances
-    ADD CONSTRAINT fk_account_balances_currency
-    FOREIGN KEY (currency_code) REFERENCES currencies(currency_code);
+-- Add foreign key constraint (if not exists)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+                  WHERE constraint_name = 'fk_account_balances_currency') THEN
+        ALTER TABLE account_balances
+            ADD CONSTRAINT fk_account_balances_currency
+            FOREIGN KEY (currency_code) REFERENCES currencies(currency_code);
+    END IF;
+END $$;
 
--- Remove calculated field total_amount_minor (violates 1NF)
-ALTER TABLE account_balances DROP COLUMN total_amount_minor;
+-- Remove calculated field total_amount_minor (violates 1NF) if exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'account_balances' AND column_name = 'total_amount_minor') THEN
+        ALTER TABLE account_balances DROP COLUMN total_amount_minor;
+    END IF;
+END $$;
 
--- Add unique constraint to prevent duplicate balances per account-currency
-ALTER TABLE account_balances
-    ADD CONSTRAINT uk_account_balances_account_currency
-    UNIQUE (account_id, currency_code);
+-- Add unique constraint to prevent duplicate balances per account-currency (if not exists)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+                  WHERE constraint_name = 'uk_account_balances_account_currency') THEN
+        ALTER TABLE account_balances
+            ADD CONSTRAINT uk_account_balances_account_currency
+            UNIQUE (account_id, currency_code);
+    END IF;
+END $$;
 
 -- Step 4: Normalize exchange rates table
 -- Rename table and update structure
