@@ -24,7 +24,7 @@ public class MultiCurrencyAccountMapper {
         Map<Currency, CurrencyBalance> currencyBalances = new HashMap<>();
         
         for (AccountCurrencyBalanceEntity balanceEntity : balanceEntities) {
-            SupportedCurrencyEntity currencyEntity = supportedCurrencies.get(balanceEntity.getCurrency());
+            SupportedCurrencyEntity currencyEntity = supportedCurrencies.get(balanceEntity.getCurrencyCode());
             if (currencyEntity != null && currencyEntity.getIsActive()) {
                 Currency currency = toCurrency(currencyEntity);
                 CurrencyBalance balance = toCurrencyBalance(balanceEntity, currency);
@@ -67,10 +67,9 @@ public class MultiCurrencyAccountMapper {
 
         AccountCurrencyBalanceEntity entity = new AccountCurrencyBalanceEntity();
         entity.setAccountId(accountId);
-        entity.setCurrency(balance.getCurrency().getCode());
+        entity.setCurrencyCode(balance.getCurrency().getCode());
         entity.setAvailableAmountMinor(balance.getAvailableAmountMinor());
         entity.setReservedAmountMinor(balance.getReservedAmountMinor());
-        entity.setTotalAmountMinor(balance.getTotalAmountMinor());
         
         return entity;
     }
@@ -82,7 +81,6 @@ public class MultiCurrencyAccountMapper {
 
         entity.setAvailableAmountMinor(balance.getAvailableAmountMinor());
         entity.setReservedAmountMinor(balance.getReservedAmountMinor());
-        entity.setTotalAmountMinor(balance.getTotalAmountMinor());
     }
 
     public Currency toCurrency(SupportedCurrencyEntity currencyEntity) {
