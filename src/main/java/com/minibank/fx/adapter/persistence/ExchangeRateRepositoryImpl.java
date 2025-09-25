@@ -5,6 +5,7 @@ import com.minibank.fx.domain.ExchangeRateRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +75,6 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
             rate.getBaseCurrency(),
             rate.getQuoteCurrency(),
             rate.getRate(),
-            rate.getSpread(),
             rate.getProvider(),
             rate.getTimestamp(),
             rate.getValidUntil()
@@ -82,13 +82,18 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepository {
     }
 
     private ExchangeRate toDomain(ExchangeRateEntity entity) {
+        // Get spread from provider entity relationship
+        BigDecimal spread = entity.getProvider() != null ?
+            entity.getProvider().getDefaultSpread() :
+            BigDecimal.valueOf(0.0025); // fallback spread
+
         return ExchangeRate.fromEntity(
             entity.getId(),
-            entity.getBaseCurrency(),
-            entity.getQuoteCurrency(),
+            entity.getBaseCurrencyCode(),
+            entity.getQuoteCurrencyCode(),
             entity.getRate(),
-            entity.getSpread(),
-            entity.getProvider(),
+            spread,
+            entity.getProviderCode(),
             entity.getTimestamp(),
             entity.getValidUntil()
         );
