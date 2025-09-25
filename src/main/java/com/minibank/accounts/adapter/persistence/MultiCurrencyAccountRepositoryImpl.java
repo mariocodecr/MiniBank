@@ -46,7 +46,7 @@ public class MultiCurrencyAccountRepositoryImpl implements MultiCurrencyAccountR
             balanceJpaRepository.findByAccountIdOrderByCurrency(account.getId());
         
         Map<String, AccountCurrencyBalanceEntity> existingBalanceMap = existingBalances.stream()
-            .collect(Collectors.toMap(AccountCurrencyBalanceEntity::getCurrency, b -> b));
+            .collect(Collectors.toMap(AccountCurrencyBalanceEntity::getCurrencyCode, b -> b));
         
         // Save/update currency balances
         Map<Currency, CurrencyBalance> accountBalances = account.getAllBalances();
@@ -77,7 +77,7 @@ public class MultiCurrencyAccountRepositoryImpl implements MultiCurrencyAccountR
             .collect(Collectors.toSet());
         
         List<AccountCurrencyBalanceEntity> balancesToRemove = existingBalances.stream()
-            .filter(b -> !currentCurrencies.contains(b.getCurrency()))
+            .filter(b -> !currentCurrencies.contains(b.getCurrencyCode()))
             .collect(Collectors.toList());
         
         if (!balancesToRemove.isEmpty()) {
@@ -140,9 +140,9 @@ public class MultiCurrencyAccountRepositoryImpl implements MultiCurrencyAccountR
     @Transactional(readOnly = true)
     public List<MultiCurrencyAccount> findByCurrencySupported(Currency currency) {
         // Find all accounts that have balance entries for this currency
-        List<AccountCurrencyBalanceEntity> balanceEntities = 
+        List<AccountCurrencyBalanceEntity> balanceEntities =
             balanceJpaRepository.findAll().stream()
-                .filter(b -> currency.getCode().equals(b.getCurrency()))
+                .filter(b -> currency.getCode().equals(b.getCurrencyCode()))
                 .collect(Collectors.toList());
         
         Set<UUID> accountIds = balanceEntities.stream()
