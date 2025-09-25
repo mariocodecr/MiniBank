@@ -8,10 +8,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "supported_currencies")
+@Table(name = "currencies")
 @EntityListeners(AuditingEntityListener.class)
 public class SupportedCurrencyEntity {
-    
+
     @Id
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
