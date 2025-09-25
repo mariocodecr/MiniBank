@@ -1,6 +1,5 @@
 package com.minibank.ledger.adapter.persistence;
 
-import com.minibank.accounts.domain.Currency;
 import com.minibank.ledger.domain.EntryType;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -29,11 +28,7 @@ public class LedgerEntryEntity {
     
     @Column(name = "amount_minor", nullable = false)
     private Long amountMinor;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
-    private Currency currency;
-    
+
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
     
@@ -45,13 +40,12 @@ public class LedgerEntryEntity {
     public LedgerEntryEntity() {}
 
     public LedgerEntryEntity(UUID id, UUID paymentId, UUID accountId, EntryType entryType,
-                            Long amountMinor, Currency currency, LocalDateTime occurredAt, LocalDateTime createdAt) {
+                            Long amountMinor, LocalDateTime occurredAt, LocalDateTime createdAt) {
         this.id = id;
         this.paymentId = paymentId;
         this.accountId = accountId;
         this.entryType = entryType;
         this.amountMinor = amountMinor;
-        this.currency = currency;
         this.occurredAt = occurredAt;
         this.createdAt = createdAt;
     }
@@ -71,9 +65,6 @@ public class LedgerEntryEntity {
 
     public Long getAmountMinor() { return amountMinor; }
     public void setAmountMinor(Long amountMinor) { this.amountMinor = amountMinor; }
-
-    public Currency getCurrency() { return currency; }
-    public void setCurrency(Currency currency) { this.currency = currency; }
 
     public LocalDateTime getOccurredAt() { return occurredAt; }
     public void setOccurredAt(LocalDateTime occurredAt) { this.occurredAt = occurredAt; }
