@@ -1,1 +1,27 @@
-rootProject.name = 'minibank-backend'
+rootProject.name = 'minibank'
+
+// Legacy monolith (to be deprecated)
+include 'minibank-backend'
+project(':minibank-backend').projectDir = file('.')
+
+// Microservices
+include 'account-service'
+project(':account-service').projectDir = file('services/account-service')
+
+include 'payment-service'
+project(':payment-service').projectDir = file('services/payment-service')
+
+include 'ledger-service'
+project(':ledger-service').projectDir = file('services/ledger-service')
+
+include 'fx-service'
+project(':fx-service').projectDir = file('services/fx-service')
+
+include 'compliance-service'
+project(':compliance-service').projectDir = file('services/compliance-service')
+
+include 'notification-service'
+project(':notification-service').projectDir = file('services/notification-service')
+
+include 'api-gateway'
+project(':api-gateway').projectDir = file('services/api-gateway')
