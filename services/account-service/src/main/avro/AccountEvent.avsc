@@ -1,0 +1,57 @@
+{
+  "namespace": "com.minibank.events.account",
+  "type": "record",
+  "name": "AccountEvent",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "accountId",
+      "type": "string"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "AccountEventType",
+        "symbols": [
+          "ACCOUNT_CREATED",
+          "ACCOUNT_UPDATED",
+          "ACCOUNT_CLOSED",
+          "BALANCE_UPDATED",
+          "CURRENCY_ADDED",
+          "CURRENCY_ENABLED",
+          "BALANCE_CREDITED",
+          "BALANCE_DEBITED",
+          "BALANCE_RESERVED",
+          "BALANCE_RELEASED"
+        ]
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "aggregateVersion",
+      "type": "long"
+    },
+    {
+      "name": "currency",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "amountMinor",
+      "type": ["null", "long"],
+      "default": null
+    },
+    {
+      "name": "eventData",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ]
+}

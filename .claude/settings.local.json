@@ -19,7 +19,8 @@
       "Bash(docker exec:*)",
       "Bash(docker restart:*)",
       "Bash(docker compose:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

@@ -16,8 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minibank.accounts.domain.events.InboxEvent;
 import com.minibank.accounts.domain.events.InboxEventRepository;
-import com.minibank.events.payment.PaymentEvent;
-import com.minibank.events.payment.PaymentEventType;
+import com.minibank.accounts.infrastructure.events.PaymentEventProcessor.PaymentEvent;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -93,7 +92,7 @@ public class PaymentEventConsumer {
             String payload = objectMapper.writeValueAsString(event);
             InboxEvent inboxEvent = InboxEvent.create(
                 event.getEventId(),
-                event.getEventType().name(),
+                event.getEventType(),
                 payload
             );
             inboxEventRepository.save(inboxEvent);
@@ -135,15 +134,15 @@ public class PaymentEventConsumer {
 
     private boolean processEvent(PaymentEvent event, InboxEvent inboxEvent) {
         try {
-            PaymentEventType eventType = event.getEventType();
+            String eventType = event.getEventType();
             
             switch (eventType) {
-                case PAYMENT_REQUESTED -> {
+                case "PAYMENT_REQUESTED" -> {
                     // No action needed for accounts service on payment request
                     logger.debug("Payment {} requested - no account action required", event.getPaymentId());
                 }
                     
-                case PAYMENT_DEBITED -> {
+                case "PAYMENT_DEBITED" -> {
                     // Account has already been debited by the payment service
                     // This is a confirmation event - could update audit logs
                     logger.info("Payment {} debited from account {} confirmed", 
@@ -151,7 +150,7 @@ public class PaymentEventConsumer {
                     eventProcessor.handlePaymentDebited(event);
                 }
                     
-                case PAYMENT_CREDITED -> {
+                case "PAYMENT_CREDITED" -> {
                     // Account has already been credited by the payment service
                     // This is a confirmation event - could update audit logs
                     logger.info("Payment {} credited to account {} confirmed", 
@@ -159,19 +158,19 @@ public class PaymentEventConsumer {
                     eventProcessor.handlePaymentCredited(event);
                 }
                     
-                case PAYMENT_COMPLETED -> {
+                case "PAYMENT_COMPLETED" -> {
                     // Payment saga completed successfully
                     logger.info("Payment {} completed successfully", event.getPaymentId());
                     eventProcessor.handlePaymentCompleted(event);
                 }
                     
-                case PAYMENT_FAILED -> {
+                case "PAYMENT_FAILED" -> {
                     // Payment failed - might need to handle account state changes
                     logger.warn("Payment {} failed: {}", event.getPaymentId(), event.getFailureReason());
                     eventProcessor.handlePaymentFailed(event);
                 }
                     
-                case PAYMENT_COMPENSATED -> {
+                case "PAYMENT_COMPENSATED" -> {
                     // Payment was compensated - account balances were reversed
                     logger.info("Payment {} compensated", event.getPaymentId());
                     eventProcessor.handlePaymentCompensated(event);
@@ -192,4 +191,5 @@ public class PaymentEventConsumer {
             return false;
         }
     }
+
 }

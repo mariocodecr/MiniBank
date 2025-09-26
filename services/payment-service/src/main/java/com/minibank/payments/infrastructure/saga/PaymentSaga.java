@@ -1,14 +1,14 @@
 package com.minibank.payments.infrastructure.saga;
 
-import com.minibank.payments.infrastructure.client.AccountServiceClient;
-import com.minibank.payments.infrastructure.events.PaymentEvent;
+import java.math.BigDecimal;
+import java.util.UUID;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.UUID;
+import com.minibank.payments.infrastructure.client.AccountServiceClient;
 
 @Component
 public class PaymentSaga {

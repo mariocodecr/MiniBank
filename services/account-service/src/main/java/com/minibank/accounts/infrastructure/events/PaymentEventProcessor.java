@@ -1,6 +1,7 @@
 package com.minibank.accounts.infrastructure.events;
 
-import com.minibank.events.payment.PaymentEvent;
+// TODO: Replace with generated Avro classes when available
+// import com.minibank.events.payment.PaymentEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,49 @@ public class PaymentEventProcessor {
         // - Update account reconciliation records
         // - Log compensation transaction
         // - Trigger account notifications about reversal
+    }
+
+    // Temporary POJO class - replace with generated Avro classes
+    public static class PaymentEvent {
+        private String eventId;
+        private String paymentId;
+        private String eventType;
+        private long timestamp;
+        private String sourceAccountId;
+        private String targetAccountId;
+        private String fromAccountId;
+        private String toAccountId;
+        private String amount;
+        private String currency;
+        private String failureReason;
+        private String eventData;
+
+        // Getters
+        public String getEventId() { return eventId; }
+        public String getPaymentId() { return paymentId; }
+        public String getEventType() { return eventType; }
+        public long getTimestamp() { return timestamp; }
+        public String getSourceAccountId() { return sourceAccountId; }
+        public String getTargetAccountId() { return targetAccountId; }
+        public String getFromAccountId() { return fromAccountId; }
+        public String getToAccountId() { return toAccountId; }
+        public String getAmount() { return amount; }
+        public String getCurrency() { return currency; }
+        public String getFailureReason() { return failureReason; }
+        public String getEventData() { return eventData; }
+
+        // Setters
+        public void setEventId(String eventId) { this.eventId = eventId; }
+        public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
+        public void setEventType(String eventType) { this.eventType = eventType; }
+        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+        public void setSourceAccountId(String sourceAccountId) { this.sourceAccountId = sourceAccountId; }
+        public void setTargetAccountId(String targetAccountId) { this.targetAccountId = targetAccountId; }
+        public void setFromAccountId(String fromAccountId) { this.fromAccountId = fromAccountId; }
+        public void setToAccountId(String toAccountId) { this.toAccountId = toAccountId; }
+        public void setAmount(String amount) { this.amount = amount; }
+        public void setCurrency(String currency) { this.currency = currency; }
+        public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
+        public void setEventData(String eventData) { this.eventData = eventData; }
     }
 }

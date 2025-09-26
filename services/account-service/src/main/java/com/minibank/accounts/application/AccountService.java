@@ -35,6 +35,12 @@ public class AccountService {
     public Optional<Account> getAccount(UUID accountId) {
         return accountRepository.findById(accountId);
     }
+
+    @Transactional(readOnly = true)
+    public Account findById(UUID accountId) {
+        return accountRepository.findById(accountId)
+            .orElseThrow(() -> new IllegalArgumentException("Account not found: " + accountId));
+    }
     
     @Transactional(readOnly = true)
     public List<Account> getAccountsByUserId(UUID userId) {

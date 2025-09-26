@@ -1,0 +1,69 @@
+{
+  "namespace": "com.minibank.events.payment",
+  "type": "record",
+  "name": "PaymentEvent",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "paymentId",
+      "type": "string"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "PaymentEventType",
+        "symbols": [
+          "PAYMENT_REQUESTED",
+          "PAYMENT_INITIATED",
+          "PAYMENT_DEBITED",
+          "PAYMENT_CREDITED",
+          "PAYMENT_COMPLETED",
+          "PAYMENT_FAILED",
+          "PAYMENT_COMPENSATED"
+        ]
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "sourceAccountId",
+      "type": "string"
+    },
+    {
+      "name": "targetAccountId",
+      "type": "string"
+    },
+    {
+      "name": "fromAccountId",
+      "type": "string"
+    },
+    {
+      "name": "toAccountId",
+      "type": "string"
+    },
+    {
+      "name": "amount",
+      "type": "string"
+    },
+    {
+      "name": "currency",
+      "type": "string"
+    },
+    {
+      "name": "failureReason",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "eventData",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ]
+}

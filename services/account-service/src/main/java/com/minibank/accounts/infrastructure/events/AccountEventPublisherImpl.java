@@ -14,8 +14,9 @@ import com.minibank.accounts.domain.CurrencyBalance;
 import com.minibank.accounts.domain.MultiCurrencyAccount;
 import com.minibank.accounts.domain.events.InboxEvent;
 import com.minibank.accounts.domain.events.InboxEventRepository;
-import com.minibank.events.account.AccountEvent;
-import com.minibank.events.account.AccountEventType;
+// TODO: Replace with generated Avro classes when available
+// import com.minibank.events.account.AccountEvent;
+// import com.minibank.events.account.AccountEventType;
 
 @Component
 public class AccountEventPublisherImpl implements AccountEventPublisher {
@@ -36,10 +37,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.ACCOUNT_CREATED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency("USD") // Default currency
             .setAmountMinor(0L)
-            .setBalanceMinor(0L)
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "ACCOUNT_CREATED");
@@ -52,10 +52,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.CURRENCY_ENABLED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency(currency.getCode())
             .setAmountMinor(0L)
-            .setBalanceMinor(0L)
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "CURRENCY_ENABLED");
@@ -69,10 +68,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.BALANCE_CREDITED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency(currency.getCode())
             .setAmountMinor(amount)
-            .setBalanceMinor(newBalance.getAvailableAmountMinor())
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "BALANCE_CREDITED");
@@ -86,10 +84,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.BALANCE_DEBITED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency(currency.getCode())
             .setAmountMinor(amount)
-            .setBalanceMinor(newBalance.getAvailableAmountMinor())
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "BALANCE_DEBITED");
@@ -103,10 +100,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.BALANCE_RESERVED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency(currency.getCode())
             .setAmountMinor(amount)
-            .setBalanceMinor(newBalance.getAvailableAmountMinor())
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "BALANCE_RESERVED");
@@ -120,10 +116,9 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             .setAccountId(account.getId().toString())
             .setEventType(AccountEventType.BALANCE_RELEASED)
             .setTimestamp(Instant.now().toEpochMilli())
+            .setAggregateVersion(1L)
             .setCurrency(currency.getCode())
             .setAmountMinor(amount)
-            .setBalanceMinor(newBalance.getAvailableAmountMinor())
-            .setCorrelationId(UUID.randomUUID().toString())
             .build();
         
         publishEvent(event, "BALANCE_RELEASED");
@@ -141,5 +136,92 @@ public class AccountEventPublisherImpl implements AccountEventPublisher {
             logger.error("Failed to serialize account event: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to publish account event", e);
         }
+    }
+
+    // Temporary POJO classes - replace with generated Avro classes
+    public static class AccountEvent {
+        private String eventId;
+        private String accountId;
+        private AccountEventType eventType;
+        private long timestamp;
+        private long aggregateVersion;
+        private String currency;
+        private Long amountMinor;
+        private String eventData;
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private AccountEvent event = new AccountEvent();
+
+            public Builder setEventId(String eventId) {
+                event.eventId = eventId;
+                return this;
+            }
+
+            public Builder setAccountId(String accountId) {
+                event.accountId = accountId;
+                return this;
+            }
+
+            public Builder setEventType(AccountEventType eventType) {
+                event.eventType = eventType;
+                return this;
+            }
+
+            public Builder setTimestamp(long timestamp) {
+                event.timestamp = timestamp;
+                return this;
+            }
+
+            public Builder setAggregateVersion(long aggregateVersion) {
+                event.aggregateVersion = aggregateVersion;
+                return this;
+            }
+
+            public Builder setCurrency(String currency) {
+                event.currency = currency;
+                return this;
+            }
+
+            public Builder setAmountMinor(Long amountMinor) {
+                event.amountMinor = amountMinor;
+                return this;
+            }
+
+            public Builder setEventData(String eventData) {
+                event.eventData = eventData;
+                return this;
+            }
+
+            public AccountEvent build() {
+                return event;
+            }
+        }
+
+        // Getters
+        public String getEventId() { return eventId; }
+        public String getAccountId() { return accountId; }
+        public AccountEventType getEventType() { return eventType; }
+        public long getTimestamp() { return timestamp; }
+        public long getAggregateVersion() { return aggregateVersion; }
+        public String getCurrency() { return currency; }
+        public Long getAmountMinor() { return amountMinor; }
+        public String getEventData() { return eventData; }
+    }
+
+    public enum AccountEventType {
+        ACCOUNT_CREATED,
+        ACCOUNT_UPDATED,
+        ACCOUNT_CLOSED,
+        BALANCE_UPDATED,
+        CURRENCY_ADDED,
+        CURRENCY_ENABLED,
+        BALANCE_CREDITED,
+        BALANCE_DEBITED,
+        BALANCE_RESERVED,
+        BALANCE_RELEASED
     }
 }

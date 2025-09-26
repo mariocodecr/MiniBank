@@ -1,9 +1,5 @@
 rootProject.name = 'minibank'
 
-// Legacy monolith (to be deprecated)
-include 'minibank-backend'
-project(':minibank-backend').projectDir = file('.')
-
 // Microservices
 include 'account-service'
 project(':account-service').projectDir = file('services/account-service')

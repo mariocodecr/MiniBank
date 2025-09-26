@@ -28,7 +28,7 @@ public class AccountApiController {
             @PathVariable UUID accountId,
             @Valid @RequestBody ReserveFundsRequest request) {
         try {
-            Money amount = new Money(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
+            Money amount = Money.of(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
             accountService.reserveFunds(accountId, amount);
             return ResponseEntity.ok(ApiResponse.success("Funds reserved successfully", null));
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -45,7 +45,7 @@ public class AccountApiController {
             @PathVariable UUID accountId,
             @Valid @RequestBody ReserveFundsRequest request) {
         try {
-            Money amount = new Money(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
+            Money amount = Money.of(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
             accountService.postCredit(accountId, amount);
             return ResponseEntity.ok(ApiResponse.success("Credit posted successfully", null));
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -62,7 +62,7 @@ public class AccountApiController {
             @PathVariable UUID accountId,
             @Valid @RequestBody ReserveFundsRequest request) {
         try {
-            Money amount = new Money(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
+            Money amount = Money.of(request.getAmount(), Currency.valueOf(request.getCurrencyCode()));
             accountService.postDebit(accountId, amount);
             return ResponseEntity.ok(ApiResponse.success("Debit posted successfully", null));
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -79,8 +79,7 @@ public class AccountApiController {
             @PathVariable UUID accountId,
             @RequestParam String currencyCode) {
         try {
-            Account account = accountService.findById(accountId)
-                    .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+            Account account = accountService.findById(accountId);
 
             Currency currency = Currency.valueOf(currencyCode);
             Money balance = account.getBalance();

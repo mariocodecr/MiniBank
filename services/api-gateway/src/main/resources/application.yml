@@ -1,0 +1,132 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # Account Service Routes (Frontend expects /accounts)
+        - id: accounts-route
+          uri: ${SERVICES_ACCOUNT_URL:http://localhost:8081}
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /accounts/(?<segment>.*)
+                replacement: /api/v1/accounts/${segment}
+            - name: Retry
+              args:
+                retries: 3
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+
+        # Payment Service Routes (Frontend expects /payments)
+        - id: payments-route
+          uri: ${SERVICES_PAYMENT_URL:http://localhost:8082}
+          predicates:
+            - Path=/payments/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /payments/(?<segment>.*)
+                replacement: /api/v1/payments/${segment}
+            - name: Retry
+              args:
+                retries: 3
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+
+        # Ledger Service Routes (Frontend expects /ledger)
+        - id: ledger-route
+          uri: ${SERVICES_LEDGER_URL:http://localhost:8083}
+          predicates:
+            - Path=/ledger/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /ledger/(?<segment>.*)
+                replacement: /api/v1/ledger/${segment}
+            - name: Retry
+              args:
+                retries: 3
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+
+        # FX Service Routes (Frontend expects /fx)
+        - id: fx-route
+          uri: ${SERVICES_FX_URL:http://localhost:8084}
+          predicates:
+            - Path=/fx/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /fx/(?<segment>.*)
+                replacement: /api/v1/fx/${segment}
+            - name: Retry
+              args:
+                retries: 3
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+
+      # Global CORS configuration
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:*"
+              - "https://*.minibank.local"
+              - "https://*.vercel.app"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
+# Service discovery endpoints for health checks
+services:
+  account:
+    url: ${SERVICES_ACCOUNT_URL:http://localhost:8081}
+  payment:
+    url: ${SERVICES_PAYMENT_URL:http://localhost:8082}
+  ledger:
+    url: ${SERVICES_LEDGER_URL:http://localhost:8083}
+  fx:
+    url: ${SERVICES_FX_URL:http://localhost:8084}
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.cors: DEBUG
